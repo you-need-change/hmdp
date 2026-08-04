@@ -46,6 +46,13 @@ export const useSessionStore = defineStore('session', () => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session.value))
   }
 
+  function clearSession() {
+    token.value = ''
+    session.value = null
+    sessionStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(SESSION_KEY)
+  }
+
   async function fetchMe() {
     if (!token.value) {
       return null
@@ -70,10 +77,7 @@ export const useSessionStore = defineStore('session', () => {
     } catch (error) {
       // 后端登出失败也继续清理本地登录态
     }
-    token.value = ''
-    session.value = null
-    sessionStorage.removeItem(TOKEN_KEY)
-    sessionStorage.removeItem(SESSION_KEY)
+    clearSession()
   }
 
   return {
@@ -83,6 +87,7 @@ export const useSessionStore = defineStore('session', () => {
     maskedPhone,
     displayName,
     saveLogin,
+    clearSession,
     fetchMe,
     logout
   }

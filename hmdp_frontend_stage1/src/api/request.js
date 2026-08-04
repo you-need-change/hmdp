@@ -27,6 +27,10 @@ request.interceptors.response.use(
   },
   (error) => {
     const message = error.response?.data?.errorMsg || error.message || '服务异常'
+    if (error.response?.status === 401) {
+      const store = useSessionStore()
+      store.clearSession()
+    }
     ElMessage.error(message)
     return Promise.reject(error)
   }

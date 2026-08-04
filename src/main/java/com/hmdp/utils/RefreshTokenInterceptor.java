@@ -27,6 +27,18 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        // 关键：如果是OPTIONS请求（预检请求），直接放行并返回200
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            // 手动设置CORS响应头
+            response.setHeader("Access-Control-Allow-Origin", "http://localhost:3001");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "Content-Type, authorization");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setStatus(HttpServletResponse.SC_OK);
+            return false; // 不继续执行后续的拦截器链
+        }
+
         String token = request.getHeader("authorization");
         if (StrUtil.isBlank(token)) {
             return true;
