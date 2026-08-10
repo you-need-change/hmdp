@@ -4,7 +4,7 @@
       <div class="topbar">
         <button class="ghost-btn" @click="router.push('/')">返回</button>
         <div class="topbar-title">本地登录态</div>
-        <span></span>
+        <button class="ghost-btn" @click="router.push('/blog-edit')">发笔记</button>
       </div>
 
       <div class="card">
@@ -66,6 +66,30 @@
       </div>
 
       <div class="card">
+        <div class="section-title" style="margin-bottom: 14px;">
+          <strong>我的笔记</strong>
+          <span>已对接 /blog/of/me</span>
+        </div>
+        <div v-if="myBlogsLoading" class="list-status">正在加载笔记...</div>
+        <div v-else-if="myBlogs.length" class="my-blog-grid">
+          <button
+            v-for="blog in myBlogs"
+            :key="blog.id"
+            class="my-blog-item"
+            type="button"
+            @click="router.push(`/blog/${blog.id}`)"
+          >
+            <img :src="blogCover(blog)" :alt="blog.title" />
+            <div class="my-blog-info">
+              <strong>{{ blog.title || '未命名笔记' }}</strong>
+              <span class="muted">点赞 {{ blog.liked || 0 }} · 评论 {{ blog.comments || 0 }}</span>
+            </div>
+          </button>
+        </div>
+        <p v-else class="muted">还没有发布过笔记，点右上角「发笔记」写第一条。</p>
+      </div>
+
+      <div class="card">
         <strong>当前 token</strong>
         <div class="code-box" style="margin-top: 12px;">
           {{ shortToken }}
@@ -88,12 +112,15 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import BottomNav from '@/components/BottomNav.vue'
 import { useSessionStore } from '@/stores/session'
 import { getUserDetail } from '@/api/user'
+import { getMyBlogs } from '@/api/blog'
 
 const router = useRouter()
 const store = useSessionStore()
 
 const user = ref(null)
 const detail = ref(null)
+const myBlogs = ref([])
+const myBlogsLoading = ref(false)
 
 const avatarChar = computed(() => {
   const name = store.displayName || '用'
@@ -117,6 +144,17 @@ const shortToken = computed(() => {
   }
   return `${token.slice(0, 12)} ... ${token.slice(-10)}`
 })
+
+function blogCover(blog) {
+  const raw = blog.images
+  if (raw) {
+    const list = Array.isArray(raw) ? raw : String(raw).split(',').filter(Boolean)
+    if (list.length) {
+      return list[0]
+    }
+  }
+  return '/imgs/blogs/blog1.jpg'
+}
 
 async function loadUser() {
   try {
@@ -151,7 +189,21 @@ async function handleLogout() {
   router.push('/login')
 }
 
-onMounted(loadUser)
+async function loadMyBlogs() {
+  myBlogsLoading.value = true
+  try {
+    myBlogs.value = await getMyBlogs()
+  } catch (error) {
+    // 未登录或接口失败时静默处理
+  } finally {
+    myBlogsLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadUser()
+  loadMyBlogs()
+})
 </script>
 
 <style scoped>
@@ -187,5 +239,43 @@ onMounted(loadUser)
   max-width: 220px;
   text-align: right;
   word-break: break-all;
+}
+
+.my-blog-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.my-blog-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.my-blog-item img {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #fff2e9;
+}
+
+.my-blog-info {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.my-blog-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

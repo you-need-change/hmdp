@@ -4,9 +4,9 @@
       <el-icon><House /></el-icon>
       <span>首页</span>
     </button>
-    <button class="nav-item" :class="{ active: current === 'login' }" @click="router.push('/login')">
-      <el-icon><Key /></el-icon>
-      <span>登录</span>
+    <button class="nav-item publish-item" type="button" @click="goPublish">
+      <img src="/imgs/add.png" alt="发布" class="publish-icon" />
+      <span>发布</span>
     </button>
     <button class="nav-item" :class="{ active: current === 'profile' }" @click="goProfile">
       <el-icon><User /></el-icon>
@@ -18,7 +18,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { House, Key, User } from '@element-plus/icons-vue'
+import { House, User } from '@element-plus/icons-vue'
 import { useSessionStore } from '@/stores/session'
 
 const props = defineProps({
@@ -39,4 +39,25 @@ function goProfile() {
   }
   router.push('/profile')
 }
+
+function goPublish() {
+  if (!store.isLoggedIn) {
+    ElMessage.warning('请先完成验证码登录')
+    router.push('/login')
+    return
+  }
+  router.push('/blog-edit')
+}
 </script>
+
+<style scoped>
+.publish-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.publish-item {
+  color: #f05e29;
+}
+</style>

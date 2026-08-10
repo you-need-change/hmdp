@@ -26,11 +26,13 @@ request.interceptors.response.use(
     return payload.data
   },
   (error) => {
-    const message = error.response?.data?.errorMsg || error.message || '服务异常'
     if (error.response?.status === 401) {
       const store = useSessionStore()
       store.clearSession()
+      ElMessage.error('请先登录')
+      return Promise.reject(error)
     }
+    const message = error.response?.data?.errorMsg || error.message || '服务异常'
     ElMessage.error(message)
     return Promise.reject(error)
   }

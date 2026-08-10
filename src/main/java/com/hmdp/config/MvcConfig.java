@@ -17,31 +17,33 @@ public class MvcConfig implements WebMvcConfigurer {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins(
+                        "http://localhost:3000",
+                        "http://localhost:3001",
+                        "http://127.0.0.1:3000",
+                        "http://127.0.0.1:3001"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
+
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // order 越小越先执行：先刷新 token 拿到用户，再做登录校验
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
                 .addPathPatterns("/**")
-                .excludePathPatterns("/**/*.js", "/**/*.css")  // 可以排除静态资源
                 .order(0);
         registry.addInterceptor(new LoginInterceptor())
                 .excludePathPatterns(
                         "/user/code",
-                        "/user/login"
+                        "/user/login",
+                        "/blog/hot"/*,
+                        "/blog/*"*/
                 )
                 .order(1);
-
-        // 添加CORS配置
-        addCorsMappings(null);
-    }
-
-    public void addCorsMappings(CorsRegistry registry) {
-        if (registry != null) {
-            registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:3001")  // 允许的前端地址
-                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedHeaders("*")
-                    .allowCredentials(true)
-                    .maxAge(3600);
-        }
     }
 }

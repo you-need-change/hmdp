@@ -173,8 +173,8 @@ async function handleSeckill(voucher) {
     return
   }
 
-  await seckillVoucher(voucher.id)
-  ElMessage.success('抢购成功')
+  const orderId = await seckillVoucher(voucher.id)
+  ElMessage.success(`抢购成功，订单号 ${orderId}`)
   await loadVouchers()
 }
 
