@@ -18,7 +18,6 @@ public class ShopTypeController {
 
     @GetMapping("/list")
     public Result queryTypeList() {
-        List<ShopType> types = typeService.query().orderByAsc("sort").list();
-        return Result.ok(types);
+        return typeService.getTypeList();
     }
 }

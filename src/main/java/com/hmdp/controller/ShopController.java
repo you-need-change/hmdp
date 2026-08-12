@@ -29,17 +29,16 @@ public class ShopController {
 
     @PutMapping
     public Result updateShop(@RequestBody Shop shop) {
-        return Result.ok(shopService.updateById(shop));
+        return shopService.update(shop);
     }
 
     @GetMapping("/of/type")
     public Result queryShopByType(
-            @RequestParam("typeId") Long typeId,
-            @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        Page<Shop> page = shopService.query()
-                .eq("type_id", typeId)
-                .page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE));
-        return Result.ok(page.getRecords());
+            @RequestParam("typeId") Integer typeId,
+            @RequestParam(value = "current", defaultValue = "1") Integer current,
+            @RequestParam(value = "x", required = false) Double x,
+            @RequestParam(value = "y", required = false) Double y) {
+        return shopService.queryShopByType(typeId, current, x, y);
     }
 
     @GetMapping("/of/name")

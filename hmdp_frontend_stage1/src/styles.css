@@ -356,6 +356,13 @@ input {
   cursor: pointer;
 }
 
+.filter-btn.active {
+  border-color: #f05e29;
+  background: #fff2e9;
+  color: #d95519;
+  font-weight: 700;
+}
+
 .list-status {
   padding: 22px 0;
   text-align: center;

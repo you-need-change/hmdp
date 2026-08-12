@@ -33,8 +33,22 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <button class="filter-btn" type="button" @click="reload">综合排序</button>
-        <button class="filter-btn" type="button" @click="reload">距离优先</button>
+        <button
+          class="filter-btn"
+          :class="{ active: sortMode === 'default' }"
+          type="button"
+          @click="useDefaultSort"
+        >
+          综合排序
+        </button>
+        <button
+          class="filter-btn"
+          :class="{ active: sortMode === 'distance' }"
+          type="button"
+          @click="useDistanceSort"
+        >
+          距离优先
+        </button>
       </div>
 
       <div class="list-status" v-if="loading">正在加载商户...</div>
@@ -55,6 +69,11 @@ import HeaderBar from '@/components/HeaderBar.vue'
 import ShopCard from '@/components/ShopCard.vue'
 import { getShopList, getShopTypes, searchShops } from '@/api/shop'
 
+const DEFAULT_LOCATION = {
+  x: 120.149993,
+  y: 30.334229
+}
+
 const route = useRoute()
 const router = useRouter()
 
@@ -65,8 +84,36 @@ const typeId = ref(Number(route.query.typeId || 1))
 const typeName = ref(route.query.typeName || '商户')
 const keyword = ref('')
 const showSearch = ref(false)
+const sortMode = ref('default')
+const location = ref({ ...DEFAULT_LOCATION })
 
 const title = computed(() => (keyword.value ? '搜索结果' : typeName.value))
+
+function getBrowserLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ ...DEFAULT_LOCATION })
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          x: position.coords.longitude,
+          y: position.coords.latitude
+        })
+      },
+      () => {
+        resolve({ ...DEFAULT_LOCATION })
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 3000,
+        maximumAge: 300000
+      }
+    )
+  })
+}
 
 async function fetchTypes() {
   shopTypes.value = await getShopTypes()
@@ -80,19 +127,38 @@ async function fetchTypes() {
 async function reload() {
   loading.value = true
   try {
-    shops.value = await getShopList({
+    const params = {
       typeId: typeId.value,
       current: 1
-    })
+    }
+    if (sortMode.value === 'distance') {
+      params.x = location.value.x
+      params.y = location.value.y
+    }
+    shops.value = await getShopList(params)
   } finally {
     loading.value = false
   }
+}
+
+async function useDefaultSort() {
+  sortMode.value = 'default'
+  await reload()
+}
+
+async function useDistanceSort() {
+  if (sortMode.value !== 'distance') {
+    location.value = await getBrowserLocation()
+  }
+  sortMode.value = 'distance'
+  await reload()
 }
 
 async function changeType(type) {
   typeId.value = type.id
   typeName.value = type.name
   keyword.value = ''
+  showSearch.value = false
   router.replace({
     path: '/shops',
     query: {
@@ -119,6 +185,7 @@ async function handleSearch() {
 
 onMounted(async () => {
   await fetchTypes()
+  location.value = await getBrowserLocation()
   await reload()
 })
 </script>

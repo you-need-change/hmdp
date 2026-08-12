@@ -81,12 +81,14 @@ onMounted( async () => {
   // }
 
   // try {
-  //   const resp = await axios.get('http://localhost:8081/blog/of/follow',
+  //   const resp = await axios.get('http://localhost:8081/shop/of/type',
   //     {
   //       params:{
-  //         "lastId": 999999999999999999,
-  //         "offset": 0,
-  //       },
+  //           "typeId": 1,
+  //           "current": 1,
+  //           "x": 120.149199,
+  //           "y": 30.324669
+  //         },
   //       headers:{
   //         "Content-Type": "application/json",
   //         "authorization": "8767e65e-46be-4e45-957c-f3ef41aedf63"
@@ -98,6 +100,7 @@ onMounted( async () => {
   //     console.log(resp.data.data)
   //   } else {
   //     console.log("请求失败！")
+  //     console.log(resp.data.errorMsg)
   //   }
   // } catch (error) {
   //   console.log(error)

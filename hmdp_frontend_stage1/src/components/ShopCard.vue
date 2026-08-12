@@ -14,6 +14,7 @@
       </div>
       <div class="shop-meta">
         <span>{{ shop.area || '杭州' }}</span>
+        <span v-if="distanceText">{{ distanceText }}</span>
         <span v-if="shop.sold">已售 {{ shop.sold }}</span>
       </div>
       <div class="address">
@@ -28,6 +29,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { MapLocation } from '@element-plus/icons-vue'
+import { formatDistance } from '@/utils/format'
 
 const props = defineProps({
   shop: {
@@ -44,4 +46,6 @@ const cover = computed(() => {
 })
 
 const score = computed(() => Number(props.shop.score || 0) / 10)
+
+const distanceText = computed(() => formatDistance(props.shop.distance))
 </script>
